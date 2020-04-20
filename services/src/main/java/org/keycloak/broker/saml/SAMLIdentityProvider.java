@@ -50,13 +50,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.security.KeyPair;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+
 import org.keycloak.dom.saml.v2.metadata.KeyTypes;
 import org.keycloak.keys.KeyMetadata;
 import org.keycloak.keys.KeyMetadata.Status;
 import org.keycloak.saml.processing.core.util.KeycloakKeySamlExtensionGenerator;
 import org.keycloak.sessions.AuthenticationSessionModel;
+
+import static org.keycloak.protocol.saml.SamlSingleSignOnUrlUtils.createSingleSignOnServiceUrl;
+
 
 /**
  * @author Pedro Igor
@@ -78,7 +81,7 @@ public class SAMLIdentityProvider extends AbstractIdentityProvider<SAMLIdentityP
             UriInfo uriInfo = request.getUriInfo();
             RealmModel realm = request.getRealm();
             String issuerURL = getEntityId(uriInfo, realm);
-            String destinationUrl = getConfig().getSingleSignOnServiceUrl();
+            String destinationUrl = createSingleSignOnServiceUrl(getConfig(), request.getHttpRequest().getUri().getQueryParameters());
             String nameIDPolicyFormat = getConfig().getNameIDPolicyFormat();
 
             if (nameIDPolicyFormat == null) {
