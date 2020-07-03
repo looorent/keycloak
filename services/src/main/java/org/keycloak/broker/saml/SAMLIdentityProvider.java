@@ -124,7 +124,10 @@ public class SAMLIdentityProvider extends AbstractIdentityProvider<SAMLIdentityP
                 authnRequest = it.next().beforeSendingLoginRequest(authnRequest, request.getAuthenticationSession());
             }
 
-            destinationUrl = ofNullable(authnRequest.getDestination()).map(URI::toString).orElse(null);
+            destinationUrl = ofNullable(authnRequest.getDestination())
+                    .map(URI::toString)
+                    .orElseThrow(() -> new IdentityBrokerException("No destination in login request"));
+
             if (postBinding) {
                 return binding.postBinding(authnRequestBuilder.toDocument()).request(destinationUrl);
             } else {
@@ -215,6 +218,9 @@ public class SAMLIdentityProvider extends AbstractIdentityProvider<SAMLIdentityP
         }
         for (Iterator<SamlAuthenticationPreprocessor> it = SamlSessionUtils.getSamlAuthenticationPreprocessorIterator(session); it.hasNext();) {
             logoutRequest = it.next().beforeSendingLogoutRequest(logoutRequest, userSession, null);
+        }
+        if (logoutRequest.getDestination() == null) {
+            throw new IdentityBrokerException("No destination in logout request");
         }
         return logoutRequest;
     }
